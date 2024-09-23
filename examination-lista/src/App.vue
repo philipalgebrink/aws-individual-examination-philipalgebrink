@@ -50,6 +50,7 @@ export default {
       }
 
       const newMessage = {
+        id: Date.now().toString(),
         username: this.username,
         text: this.messageText,
       };
