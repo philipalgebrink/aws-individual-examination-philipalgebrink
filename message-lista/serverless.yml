@@ -1,0 +1,47 @@
+service: message-lista-backend
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  deploymentBucket:
+    name: philip-bucket-examination
+
+functions:
+  createMessage:
+    handler: handler.createMessage
+    events:
+      - http:
+          path: messages
+          method: post
+          cors: true
+  updateMessage:
+    handler: handler.updateMessage
+    events:
+      - http:
+          path: messages/{id}
+          method: put
+          cors: true
+  getMessages:
+    handler: handler.getMessages
+    events:
+      - http:
+          path: messages
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    MessagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: messages
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
