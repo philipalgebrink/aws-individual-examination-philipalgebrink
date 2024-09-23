@@ -46,7 +46,7 @@ app.get("/messages", async (req, res) => {
 
 // POST message
 app.post("/messages", async (req, res) => {
-  const { id, username, text } = req.body; // Make sure to include the message structure
+  const { id, username, text } = req.body;
 
   if (!id || !username || !text) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -54,13 +54,13 @@ app.post("/messages", async (req, res) => {
 
   const params = {
     TableName: USERS_TABLE,
-    Item: { id, username, text }, // Ensure this matches your DynamoDB table schema
+    Item: { id, username, text, createdAt: new Date().toISOString() },
   };
 
   try {
     const command = new PutCommand(params);
     await docClient.send(command);
-    res.json({ id, username, text }); // Respond with the saved message
+    res.json({ id, username, text, createdAt: new Date().toISOString() }); // Respond with the saved message
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not save message" });
