@@ -6,28 +6,35 @@ provider:
   region: eu-north-1
   deploymentBucket:
     name: philip-bucket-examination
+  environment:
+    USERS_TABLE: messages # Ensure this is set correctly
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/messages # Adjust if necessary
 
 functions:
-  createMessage:
-    handler: handler.createMessage
+  app:
+    handler: handler.handler # Point to the exported handler for the Express app
     events:
       - http:
-          path: messages
+          path: users/{userId} # GET user by userId
+          method: get
+          cors: true
+      - http:
+          path: users # POST user
           method: post
           cors: true
-  updateMessage:
-    handler: handler.updateMessage
-    events:
       - http:
-          path: messages/{id}
-          method: put
-          cors: true
-  getMessages:
-    handler: handler.getMessages
-    events:
-      - http:
-          path: messages
+          path: messages # GET messages
           method: get
+          cors: true
+      - http:
+          path: messages # POST messages
+          method: post
           cors: true
 
 resources:
