@@ -46,21 +46,21 @@ app.get("/messages", async (req, res) => {
 
 // POST message
 app.post("/messages", async (req, res) => {
-  const { id, username, text } = req.body;
+  const { id, username, text, createdAt } = req.body;
 
-  if (!id || !username || !text) {
+  if (!id || !username || !text || !createdAt) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   const params = {
     TableName: USERS_TABLE,
-    Item: { id, username, text, createdAt: new Date().toISOString() },
+    Item: { id, username, text, createdAt },
   };
 
   try {
     const command = new PutCommand(params);
     await docClient.send(command);
-    res.json({ id, username, text, createdAt: new Date().toISOString() }); // Respond with the saved message
+    res.json({ id, username, text, createdAt }); // Respond with the saved message
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not save message" });

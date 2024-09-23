@@ -53,6 +53,7 @@ export default {
         id: Date.now().toString(),
         username: this.username,
         text: this.messageText,
+        createdAt: new Date().toISOString(),
       };
 
       try {
