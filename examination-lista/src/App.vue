@@ -15,7 +15,7 @@
     <ul>
       <li v-for="(message, index) in messages" :key="index">
         <strong>{{ message.username }}:</strong> {{ message.text }}
-        <em>({{ message.createdAt }})</em>
+        <em>({{ formatDate(message.createdAt) }})</em>
       </li>
     </ul>
   </div>
@@ -33,6 +33,17 @@ export default {
     };
   },
   methods: {
+    formatDate(dateString) {
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZoneName: "short",
+      };
+      return new Date(dateString).toLocaleString(undefined, options);
+    },
     async fetchMessages() {
       try {
         const response = await axios.get(
