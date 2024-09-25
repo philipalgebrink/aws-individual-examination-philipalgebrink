@@ -4,6 +4,7 @@ const {
   GetCommand,
   PutCommand,
   ScanCommand,
+  QueryCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const express = require("express");
 const serverless = require("serverless-http");
@@ -18,29 +19,54 @@ app.use(express.json());
 
 // CORS Middleware
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // Allow all origins
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  // Handle preflight requests
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
   next();
 });
 
-// GET all messages
+// GET all messages or by username
 app.get("/messages", async (req, res) => {
-  const params = {
-    TableName: USERS_TABLE,
-  };
+  const { username } = req.query;
 
-  try {
-    const command = new ScanCommand(params);
-    const { Items } = await docClient.send(command);
-    res.json(Items); // Send back the items (messages)
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Could not retrieve messages" });
+  if (username) {
+    // Make sure the IndexName matches your GSI name exactly
+    const params = {
+      TableName: USERS_TABLE,
+      IndexName: "username-index", // This must match the name of your GSI exactly
+      KeyConditionExpression: "username = :username",
+      ExpressionAttributeValues: {
+        ":username": username,
+      },
+    };
+
+    try {
+      const command = new QueryCommand(params);
+      const { Items } = await docClient.send(command);
+      res.json(Items);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: "Could not retrieve messages by username" });
+    }
+  } else {
+    // Fetch all messages if no username is provided
+    const params = {
+      TableName: USERS_TABLE,
+    };
+
+    try {
+      const command = new ScanCommand(params);
+      const { Items } = await docClient.send(command);
+      res.json(Items); // Send back all messages
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Could not retrieve messages" });
+    }
   }
 });
 
@@ -67,57 +93,7 @@ app.post("/messages", async (req, res) => {
   }
 });
 
-// GET user
-app.get("/users/:userId", async (req, res) => {
-  const params = {
-    TableName: USERS_TABLE,
-    Key: {
-      userId: req.params.userId,
-    },
-  };
-
-  try {
-    const command = new GetCommand(params);
-    const { Item } = await docClient.send(command);
-    if (Item) {
-      const { userId, name } = Item;
-      res.json({ userId, name });
-    } else {
-      res
-        .status(404)
-        .json({ error: 'Could not find user with provided "userId"' });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Could not retrieve user" });
-  }
-});
-
-// POST user
-app.post("/users", async (req, res) => {
-  const { userId, name } = req.body;
-  if (typeof userId !== "string") {
-    return res.status(400).json({ error: '"userId" must be a string' });
-  } else if (typeof name !== "string") {
-    return res.status(400).json({ error: '"name" must be a string' });
-  }
-
-  const params = {
-    TableName: USERS_TABLE,
-    Item: { userId, name },
-  };
-
-  try {
-    const command = new PutCommand(params);
-    await docClient.send(command);
-    res.json({ userId, name });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Could not create user" });
-  }
-});
-
-// Catch-all route for 404, very bad
+// Catch-all route for 404
 app.use((req, res, next) => {
   return res.status(404).json({
     error: "Not Found",

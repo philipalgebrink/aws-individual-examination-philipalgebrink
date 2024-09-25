@@ -1,6 +1,6 @@
 <template>
   <div class="form-container">
-    <h2>Write a Message</h2>
+    <h2>Skriv ett meddelande!</h2>
     <textarea
       v-model="messageText"
       placeholder="Låt oss baka pannkakor!"
