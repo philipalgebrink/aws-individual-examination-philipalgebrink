@@ -1,6 +1,18 @@
 <template>
   <div class="messages-container">
-    <div class="message-card" v-for="(message, index) in messages" :key="index">
+    <div class="sort-options">
+      <label for="sort">Sort by:</label>
+      <select id="sort" v-model="sortOrder" @change="sortMessages">
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+      </select>
+    </div>
+
+    <div
+      class="message-card"
+      v-for="(message, index) in sortedMessages"
+      :key="index"
+    >
       <p class="message-text">{{ message.text }}</p>
       <p class="message-author">— {{ message.username }}</p>
       <p class="message-date">{{ formatDate(message.createdAt) }}</p>
@@ -22,7 +34,20 @@ export default {
   data() {
     return {
       messages: [],
+      sortOrder: "newest",
     };
+  },
+  computed: {
+    sortedMessages() {
+      const messagesCopy = Array.from(this.messages);
+      return messagesCopy.sort((a, b) => {
+        if (this.sortOrder === "newest") {
+          return new Date(b.createdAt) - new Date(a.createdAt); // Newest first
+        } else {
+          return new Date(a.createdAt) - new Date(b.createdAt); // Oldest first
+        }
+      });
+    },
   },
   methods: {
     formatDate(dateString) {
@@ -46,6 +71,9 @@ export default {
         console.error("Error fetching messages:", error);
       }
     },
+    sortMessages() {
+      this.sortedMessages;
+    },
   },
   mounted() {
     this.fetchMessages();
@@ -54,6 +82,20 @@ export default {
 </script>
 
 <style>
+.sort-options {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.sort-options select {
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #bdc3c7;
+}
+
 .fab {
   position: fixed;
   bottom: 20px;
