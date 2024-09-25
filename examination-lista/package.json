@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "npm run build && aws s3 cp ./dist s3://philip-bucket-examination/ --recursive"
   },
   "dependencies": {
     "core-js": "^3.8.3",
