@@ -1,110 +1,138 @@
 <template>
   <div id="app">
-    <h1>Message Board</h1>
-
-    <div class="form-container">
-      <input v-model="username" placeholder="Enter your username" />
-      <textarea
-        v-model="messageText"
-        placeholder="Enter your message"
-      ></textarea>
-      <button @click="postMessage">Post Message</button>
-    </div>
-
-    <h2>All Messages</h2>
-    <ul>
-      <li v-for="(message, index) in messages" :key="index">
-        <strong>{{ message.username }}:</strong> {{ message.text }}
-        <em>({{ formatDate(message.createdAt) }})</em>
-      </li>
-    </ul>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
-  data() {
-    return {
-      username: "",
-      messageText: "",
-      messages: [],
-    };
-  },
-  methods: {
-    formatDate(dateString) {
-      const options = {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZoneName: "short",
-      };
-      return new Date(dateString).toLocaleString(undefined, options);
-    },
-    async fetchMessages() {
-      try {
-        const response = await axios.get(
-          "https://0ghtxigwa9.execute-api.eu-north-1.amazonaws.com/dev/messages"
-        );
-        this.messages = response.data;
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    },
-    async postMessage() {
-      if (this.username === "" || this.messageText === "") {
-        alert("Username and message cannot be empty.");
-        return;
-      }
-
-      const newMessage = {
-        id: Date.now().toString(),
-        username: this.username,
-        text: this.messageText,
-        createdAt: new Date().toISOString(),
-      };
-
-      try {
-        await axios.post(
-          "https://0ghtxigwa9.execute-api.eu-north-1.amazonaws.com/dev/messages",
-          newMessage
-        );
-        this.messageText = ""; // Clear message input after successful post
-        this.fetchMessages();
-      } catch (error) {
-        console.error("Error posting message:", error);
-      }
-    },
-  },
-  mounted() {
-    this.fetchMessages();
-  },
+  name: "App",
 };
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  text-align: center;
-  margin-top: 30px;
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.form-container {
+/* Global styling */
+
+body {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  background-color: #2c3e50;
+  color: white;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  color: #ecf0f1;
   margin-bottom: 20px;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 input,
 textarea {
-  width: 300px;
-  margin: 5px 0;
-  padding: 10px;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333;
+  background-color: white;
 }
 
 button {
-  padding: 10px 20px;
+  display: inline-block;
+  background-color: #e74c3c;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #c0392b;
+}
+
+.container {
+  padding: 20px;
+}
+
+.fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 15px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+}
+
+.fab img {
+  width: 20px;
+  height: 20px;
+}
+
+.no-messages {
+  text-align: center;
+  color: #ecf0f1;
+  font-size: 18px;
+  padding: 20px;
+  background-color: #34495e;
+  border-radius: 10px;
+}
+
+.message-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  color: #333;
+  margin-bottom: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-text {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.message-author {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.message-date {
+  font-size: 12px;
+  color: #7f8c8d;
+  text-align: right;
 }
 </style>
