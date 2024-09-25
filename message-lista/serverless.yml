@@ -14,6 +14,7 @@ provider:
         - dynamodb:Scan
         - dynamodb:GetItem
         - dynamodb:PutItem
+        - dynamodb:UpdateItem # Added this to allow updates
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/messages # Adjust if necessary
 
 functions:
@@ -36,6 +37,10 @@ functions:
           path: messages # POST messages
           method: post
           cors: true
+      - http:
+          path: messages/{id} # PUT to update messages by ID
+          method: put
+          cors: true # Added PUT method for updating messages
 
 resources:
   Resources:

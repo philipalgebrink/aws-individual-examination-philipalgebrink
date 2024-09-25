@@ -29,8 +29,24 @@
     >
       <div class="date-tab">{{ formatDateWithDay(message.createdAt) }}</div>
       <div class="message-body">
-        <p class="message-text">{{ message.text }}</p>
-        <p class="message-author">— {{ message.username }}</p>
+        <div v-if="editingMessageId === message.id">
+          <!-- Editable message text when in editing mode -->
+          <textarea
+            v-model="editText"
+            rows="3"
+            class="edit-textarea"
+          ></textarea>
+          <button class="save-button" @click="saveEdit(message.id)">
+            Spara
+          </button>
+          <button class="cancel-button" @click="cancelEdit">Avbryt</button>
+        </div>
+        <div v-else>
+          <!-- Non-editable message text -->
+          <p class="message-text">{{ message.text }}</p>
+          <p class="message-author">— {{ message.username }}</p>
+          <button class="edit-button" @click="enableEdit(message)">📝</button>
+        </div>
       </div>
     </div>
 
@@ -54,6 +70,8 @@ export default {
       messages: [], // All messages from the backend
       sortOrder: "newest", // Default sort order
       searchUsername: "", // Search input for username
+      editingMessageId: null, // Track the ID of the message being edited
+      editText: "", // Text of the message being edited
     };
   },
   computed: {
@@ -113,6 +131,46 @@ export default {
       // Fetch messages filtered by username when the user types in the search field
       console.log("Search query:", this.searchUsername);
       this.fetchMessages(this.searchUsername);
+    },
+    enableEdit(message) {
+      // Enable editing mode for the selected message
+      this.editingMessageId = message.id;
+      this.editText = message.text;
+    },
+    cancelEdit() {
+      // Cancel editing mode
+      this.editingMessageId = null;
+      this.editText = "";
+    },
+    async saveEdit(messageId) {
+      try {
+        // Find the message by ID
+        const message = this.messages.find((msg) => msg.id === messageId);
+
+        // Send PUT request to update the message
+        const url = `https://0ghtxigwa9.execute-api.eu-north-1.amazonaws.com/dev/messages/${messageId}`;
+        const updatedMessage = {
+          text: this.editText,
+          username: message.username,
+        }; // Include username
+
+        await axios.put(url, updatedMessage);
+        console.log("Message updated successfully!");
+
+        // Update the message in the local list after saving
+        const messageIndex = this.messages.findIndex(
+          (msg) => msg.id === messageId
+        );
+        if (messageIndex !== -1) {
+          this.messages[messageIndex].text = this.editText;
+        }
+
+        // Exit editing mode
+        this.editingMessageId = null;
+        this.editText = "";
+      } catch (error) {
+        console.error("Error updating message:", error);
+      }
     },
   },
   mounted() {
@@ -192,14 +250,48 @@ export default {
 .message-text {
   font-size: 16px;
   color: #333;
-  word-wrap: break-word; /* Ensures long text breaks and wraps to a new line */
-  overflow-wrap: break-word; /* Supports wider browser compatibility */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .message-author {
   font-size: 14px;
   font-weight: bold;
   color: #333;
+}
+
+.edit-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 2px;
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.save-button,
+.cancel-button {
+  margin-right: 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e74c3c;
+  color: white;
+  cursor: pointer;
+}
+
+.save-button:hover,
+.cancel-button:hover {
+  background-color: #c0392b;
 }
 
 /* Floating action button (FAB) */

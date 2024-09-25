@@ -5,6 +5,7 @@ const {
   PutCommand,
   ScanCommand,
   QueryCommand,
+  UpdateCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const express = require("express");
 const serverless = require("serverless-http");
@@ -21,7 +22,7 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
@@ -90,6 +91,40 @@ app.post("/messages", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not save message" });
+  }
+});
+
+// PUT endpoint for editing a message
+app.put("/messages/:id", async (req, res) => {
+  const { id } = req.params;
+  const { text, username } = req.body; // Assuming text and username are updated
+
+  if (!text || !username) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const params = {
+    TableName: USERS_TABLE,
+    Key: { id },
+    UpdateExpression: "set #text = :text, #username = :username",
+    ExpressionAttributeNames: {
+      "#text": "text",
+      "#username": "username",
+    },
+    ExpressionAttributeValues: {
+      ":text": text,
+      ":username": username,
+    },
+    ReturnValues: "ALL_NEW", // Return updated item
+  };
+
+  try {
+    const command = new UpdateCommand(params);
+    const { Attributes } = await docClient.send(command); // Attributes contain the updated item
+    res.json(Attributes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Could not update the message" });
   }
 });
 
