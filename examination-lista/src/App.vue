@@ -1,6 +1,34 @@
 <template>
   <div id="app">
     <router-view></router-view>
+
+    <div class="wave-container darker-wave">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <path
+          fill="#005f80"
+          fill-opacity="1"
+          d="M0,224L48,202.7C96,181,192,139,288,138.7C384,139,480,181,576,208C672,235,768,245,864,218.7C960,192,1056,128,1152,106.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+        ></path>
+      </svg>
+    </div>
+
+    <div class="wave-container">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <path
+          fill="#00bfff"
+          fill-opacity="1"
+          d="M0,224L48,202.7C96,181,192,139,288,138.7C384,139,480,181,576,208C672,235,768,245,864,218.7C960,192,1056,128,1152,106.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+        ></path>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -20,9 +48,30 @@ export default {
 
 /* Global styling */
 
+.wave-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.darker-wave {
+  z-index: -2; /* Puts it behind the first wave */
+  opacity: 1; /* Optional: Adds a bit of transparency for subtle effect */
+  bottom: 30px;
+}
+
+.wave-container svg {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
-  background-color: #2c3e50;
+  background-color: #19274a;
   color: white;
   margin: 0;
   padding: 0;

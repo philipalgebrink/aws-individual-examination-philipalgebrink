@@ -1,5 +1,6 @@
 <template>
-  <div class="messages-container">
+  <div class="header-container">
+    <div class="app-title">Shui</div>
     <!-- Sort options dropdown -->
     <div class="sort-options">
       <label for="sort">Sortera:</label>
@@ -8,7 +9,8 @@
         <option value="oldest">Äldsta</option>
       </select>
     </div>
-
+  </div>
+  <div>
     <!-- Search field for username -->
     <div class="search-container">
       <input
@@ -25,10 +27,13 @@
       v-for="(message, index) in sortedMessages"
       :key="index"
     >
-      <p class="message-text">{{ message.text }}</p>
-      <p class="message-author">— {{ message.username }}</p>
-      <p class="message-date">{{ formatDate(message.createdAt) }}</p>
+      <div class="date-tab">{{ formatDateWithDay(message.createdAt) }}</div>
+      <div class="message-body">
+        <p class="message-text">{{ message.text }}</p>
+        <p class="message-author">— {{ message.username }}</p>
+      </div>
     </div>
+
     <div v-if="sortedMessages.length === 0" class="no-messages">
       Du har inga meddelanden att visa.
     </div>
@@ -75,16 +80,18 @@ export default {
     },
   },
   methods: {
-    formatDate(dateString) {
+    formatDateWithDay(dateString) {
       const options = {
+        weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        timeZoneName: "short",
       };
-      return new Date(dateString).toLocaleString(undefined, options);
+
+      // Format the date in Swedish locale
+      return new Date(dateString).toLocaleDateString("sv-SE", options);
     },
     async fetchMessages(username = "") {
       try {
@@ -115,19 +122,30 @@ export default {
 </script>
 
 <style scoped>
-/* Add any necessary styles */
-.sort-options {
+/* Header styling */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
+}
+
+.app-title {
+  background-color: #ff5b5b;
+  color: #19274a;
+  font-size: 36px;
+  font-weight: bold;
+  padding: 0px 70px;
+  text-align: center;
+  height: auto;
+  width: auto;
+}
+
+/* Sort options styling */
+.sort-options {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-}
-
-.sort-options select {
-  padding: 5px;
-  font-size: 14px;
-  border-radius: 5px;
-  border: 1px solid #bdc3c7;
 }
 
 .search-container {
@@ -137,22 +155,54 @@ export default {
 }
 
 .search-container input {
-  padding: 10px;
+  padding: 8px;
   width: 100%;
   border: 1px solid #bdc3c7;
   border-radius: 5px;
   font-size: 16px;
 }
 
+/* Message card styling */
 .message-card {
   background-color: white;
   padding: 20px;
   border-radius: 10px;
-  color: #333;
   margin-bottom: 20px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for card */
+  position: relative;
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
 }
 
+.date-tab {
+  background-color: #ff5b5b;
+  color: white;
+  font-size: 12px;
+  padding: 5px 10px;
+  font-weight: bold;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-top-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.message-body {
+  margin-top: 30px;
+}
+
+.message-text {
+  font-size: 16px;
+  color: #333;
+  word-wrap: break-word; /* Ensures long text breaks and wraps to a new line */
+  overflow-wrap: break-word; /* Supports wider browser compatibility */
+}
+
+.message-author {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Floating action button (FAB) */
 .fab {
   position: fixed;
   bottom: 20px;
@@ -162,7 +212,7 @@ export default {
   border: none;
   border-radius: 50%;
   padding: 15px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 }
 
@@ -172,8 +222,8 @@ export default {
 
 .no-messages {
   text-align: center;
-  margin-top: 20px;
-  font-size: 18px;
+  font-size: 16px;
   color: #bdc3c7;
+  margin-top: 20px;
 }
 </style>
